@@ -56,7 +56,7 @@ def display_lines(image, lines):
 
 def region_of_interest(image):
     height = image.shape[0]
-    polygons = np.array([[(120, height), (900, height), (480, 290)]])
+    polygons = np.array([[(100, height), (930, height), (480, 290)]])
     mask = np.zeros_like(image)
     cv2.fillPoly(mask, polygons, 255)
     masked_image = cv2.bitwise_and(image, mask)
@@ -70,7 +70,6 @@ def frameDetector(image):
     line_image = display_lines(lane_image, lines_avg)
     return cv2.addWeighted(lane_image, 0.8, line_image, 1, 1)
 
-
 def image_pipeline(folder):
     for filename in os.listdir(folder):
         print(filename)
@@ -78,16 +77,22 @@ def image_pipeline(folder):
         if img is not None:
             cv2.imwrite("./test_images_output/" + filename  + ".jpg", frameDetector(img))
 
-image_pipeline('test_images')
+# image_pipeline('test_images')
 
-# video = cv2.VideoCapture('./test_videos/3.mp4')
-#
-# while(video.isOpened()):
-#     _, frame = video.read()
-#     constructed_frame = frameDetector(frame)
-#     cv2.imshow("the product", constructed_frame)
-#     if cv2.waitKey(100) == ord('q'):
-#         break
-#
-# video.release()
-# cv2.destroyAllWindows()
+video = cv2.VideoCapture('./test_videos/3.mp4')
+
+frame_width = int(video.get(3))
+frame_height = int(video.get(4))
+
+out = cv2.VideoWriter('./test_videos_output/3.avi', cv2.VideoWriter_fourcc('M','J','P','G'), 30, (frame_width,frame_height))
+
+while(video.isOpened()):
+    ret, frame = video.read()
+    if ret:
+        constructed_frame = frameDetector(frame)
+        out.write(constructed_frame)
+    else:
+        break
+
+video.release()
+out.release()
