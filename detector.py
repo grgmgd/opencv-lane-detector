@@ -7,7 +7,7 @@ import os
 def canny(image):
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    canny = cv2.Canny(gray, 50, 150)
+    canny = cv2.Canny(gray, 120, 240)
     return canny
 
 def coordinate(image, parameters):
@@ -54,7 +54,7 @@ def display_lines(image, lines):
 
     for line in lines:
         x1, y1, x2, y2 = line
-        if(x1 > 1024):
+        if(x1 > 1280 or x2 > 1280 or y1 > 720 or y2 > 720):
             break
         cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10)
 
