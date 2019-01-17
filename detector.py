@@ -15,10 +15,9 @@ def coordinate(image, parameters):
     if(np.isnan(np.min(parameters))):
         return np.array([0, 0, 0, 0])
 
-
     slope, intercept = parameters
-    y1 = 310
-    y2 = int(y1*(1/7))
+    y1 = image.shape[0]
+    y2 = int(y1*(3/5))
     x1 = int((y1-intercept)/slope)
     x2 = int((y2-intercept)/slope)
     return np.array([x1, y1, x2, y2])
@@ -55,13 +54,15 @@ def display_lines(image, lines):
 
     for line in lines:
         x1, y1, x2, y2 = line
-        cv2.line(line_image, (x1, y1), (x2, y2), (0, 255, 0), 15)
+        if(x1 > 1024):
+            break
+        cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10)
 
     return line_image
 
 def region_of_interest(image):
     height = image.shape[0]
-    polygons = np.array([[(1080, 200), (229, 200), (574, 64), (800, 64)]])
+    polygons = np.array([[(1000, 600), (350, 600), (590, 450), (740, 450)]])
     mask = np.zeros_like(image)
     cv2.fillPoly(mask, polygons, 255)
     masked_image = cv2.bitwise_and(image, mask)
@@ -71,7 +72,7 @@ def frameDetector(image):
     lane_image = np.copy(image)
     regioned_image = region_of_interest(canny(lane_image))
     # return regioned_image
-    lines = cv2.HoughLinesP(regioned_image, 2, np.pi/180, 100, np.array([]), minLineLength=20, maxLineGap=5)
+    lines = cv2.HoughLinesP(regioned_image, 2, np.pi/180, 100, np.array([]), minLineLength=3, maxLineGap=20)
     lines_avg = average_lines(lane_image, lines)
     line_image = display_lines(lane_image, lines_avg)
     return cv2.addWeighted(lane_image, 0.8, line_image, 1, 1)
@@ -85,12 +86,12 @@ def image_pipeline(folder):
 
 # image_pipeline('test_images')
 
-video = cv2.VideoCapture('./test_videos/2.mp4')
+video = cv2.VideoCapture('./test_videos/1.mp4')
 
 frame_width = int(video.get(3))
 frame_height = int(video.get(4))
 
-out = cv2.VideoWriter('./test_videos_output/2.avi', cv2.VideoWriter_fourcc('M','J','P','G'), 30, (frame_width,frame_height))
+out = cv2.VideoWriter('./test_videos_output/1.avi', cv2.VideoWriter_fourcc('M','J','P','G'), 30, (frame_width,frame_height))
 
 while(video.isOpened()):
     ret, frame = video.read()
