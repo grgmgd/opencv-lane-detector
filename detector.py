@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
 import cv2
+import os
 
 def canny(image):
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
@@ -64,21 +65,29 @@ def region_of_interest(image):
 def frameDetector(image):
     lane_image = np.copy(image)
     regioned_image = region_of_interest(canny(lane_image))
-    return canny(lane_image)
     lines = cv2.HoughLinesP(regioned_image, 2, np.pi/180, 100, np.array([]), minLineLength=30, maxLineGap=5)
     lines_avg = average_lines(lane_image, lines)
     line_image = display_lines(lane_image, lines_avg)
     return cv2.addWeighted(lane_image, 0.8, line_image, 1, 1)
 
 
-video = cv2.VideoCapture('./test_videos/3.mp4')
+def image_pipeline(folder):
+    for filename in os.listdir(folder):
+        print(filename)
+        img = cv2.imread(os.path.join(folder,filename))
+        if img is not None:
+            cv2.imwrite("./test_images_output/" + filename  + ".jpg", frameDetector(img))
 
-while(video.isOpened()):
-    _, frame = video.read()
-    constructed_frame = frameDetector(frame)
-    cv2.imshow("the product", constructed_frame)
-    if cv2.waitKey(100) == ord('q'):
-        break
+image_pipeline('test_images')
 
-video.release()
-cv2.destroyAllWindows()
+# video = cv2.VideoCapture('./test_videos/3.mp4')
+#
+# while(video.isOpened()):
+#     _, frame = video.read()
+#     constructed_frame = frameDetector(frame)
+#     cv2.imshow("the product", constructed_frame)
+#     if cv2.waitKey(100) == ord('q'):
+#         break
+#
+# video.release()
+# cv2.destroyAllWindows()
